@@ -1,0 +1,182 @@
+using beta.Components;
+using beta.GameStates;
+using beta.StateManager;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
+
+namespace beta
+{
+    /// <summary>
+    /// This is the main type for your game.
+    /// </summary>
+    public class Game1 : Game
+    {
+        //Name of Objects
+        GraphicsDeviceManager graphics;
+        SpriteBatch spriteBatch;
+
+        Texture2D enemyTexture;
+        Rectangle enemyRectangle;
+        int enemyCenter;
+
+        Texture2D playerTexture;
+        Rectangle playerRectangle;
+        int playerCenter;
+
+        GameStateManager gameStateManager;
+
+        ITitleIntroState titleIntroState;
+        IMainMenuState mainMenuState;
+        IMapState mapState;        
+
+        static Rectangle screenRetangle;
+        //Ends
+
+        //Constructors
+        public SpriteBatch SpriteBatch
+        {
+            get { return spriteBatch; }
+        }
+
+        public static Rectangle ScreenRectangle
+        {
+            get { return screenRetangle; }
+        }
+
+        public static GameStateManager GameStateManager
+        {
+            get { return GameStateManager; }
+        }
+
+        public ITitleIntroState TitleIntroState
+        {
+         get { return titleIntroState; }
+        }
+
+        public IMainMenuState MainMenuState
+        {
+            get { return mainMenuState; }
+        }
+
+        public IMapState MapState
+        {
+            get { return mapState; }
+        }
+        //Ends
+
+        public Game1()
+        {
+            graphics = new GraphicsDeviceManager(this);
+            Content.RootDirectory = "Content";
+            
+            //window size
+            screenRetangle = new Rectangle(0, 0, 1280, 720);
+
+            graphics.PreferredBackBufferWidth = screenRetangle.Width;
+            graphics.PreferredBackBufferHeight = screenRetangle.Height;
+            //ends
+
+            gameStateManager = new GameStateManager(this);
+            Components.Add(gameStateManager);
+
+            this.IsMouseVisible = true;
+
+            //Must call them here to activate them
+            titleIntroState = new TitleIntroState(this);
+            mainMenuState = new MainMenuState(this);
+            mapState = new MapState(this);
+            //end
+
+            //states starting area
+            gameStateManager.ChangeState((TitleIntroState)titleIntroState, PlayerIndex.One);
+            //ends
+        }
+
+        /// <summary>
+        /// Allows the game to perform any initialization it needs to before starting to run.
+        /// This is where it can query for any required services and load any non-graphic
+        /// related content.  Calling base.Initialize will enumerate through any components
+        /// and initialize them as well.
+        /// </summary>
+        protected override void Initialize()
+        {
+            //calling the control class
+            Components.Add(new Xin(this));
+            //ends
+
+            base.Initialize();
+        }
+
+        /// <summary>
+        /// LoadContent will be called once per game and is the place to load
+        /// all of your content.
+        /// </summary>
+        protected override void LoadContent()
+        {        
+            spriteBatch = new SpriteBatch(GraphicsDevice);
+
+            playerTexture = Content.Load<Texture2D>("Player1");
+            playerRectangle = new Rectangle(350, 50, playerTexture.Width, playerTexture.Height);
+
+            enemyTexture = Content.Load<Texture2D>("shuttle");
+            enemyRectangle = new Rectangle(350, 50, enemyTexture.Width, enemyTexture.Height); 
+            
+                           
+        }
+
+        /// <summary>
+        /// UnloadContent will be called once per game and is the place to unload
+        /// game-specific content.
+        /// </summary>
+        protected override void UnloadContent()
+        {
+            // TODO: Unload any non ContentManager content here
+        }
+
+        /// <summary>
+        /// Allows the game to run logic such as updating the world,
+        /// checking for collisions, gathering input, and playing audio.
+        /// </summary>
+        /// <param name="gameTime">Provides a snapshot of timing values.</param>
+        protected override void Update(GameTime gameTime)
+        {
+           
+
+            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
+                Exit();
+            //centers update bit//
+
+            playerCenter = playerRectangle.X + (playerTexture.Width / 2);
+            enemyCenter = enemyRectangle.X + (enemyTexture.Width / 2);
+
+            // TODO: Add your update logic here
+
+            base.Update(gameTime);
+        }
+        void EnemyMovement()
+        {
+            if (playerCenter > enemyCenter)
+                enemyRectangle.X += 2;
+            if (playerCenter < enemyCenter)
+                enemyRectangle.X -= 2;
+            if (playerCenter > enemyCenter)
+                enemyRectangle.Y += 2;
+            if (playerCenter < enemyCenter)
+                enemyRectangle.Y -= 2;
+        }
+        /// <summary>
+        /// This is called when the game should draw itself.
+        /// </summary>
+        /// <param name="gameTime">Provides a snapshot of timing values.</param>
+        protected override void Draw(GameTime gameTime)
+        {
+            GraphicsDevice.Clear(Color.CornflowerBlue);
+            spriteBatch.Draw(playerTexture, playerRectangle, Color.White);
+            spriteBatch.Draw(enemyTexture, enemyRectangle, Color.White);
+            // TODO: Add your drawing code here
+
+            base.Draw(gameTime);
+        }
+    }
+}
